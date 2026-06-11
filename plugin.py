@@ -1,25 +1,29 @@
-import os
+from pathlib import Path
 
-from lsp_utils import NpmClientHandler
+from LSP.plugin import LspPlugin, OnPreStartContext
+from lsp_utils import NodeManager
+from sublime_lib import ResourcePath
+from typing_extensions import override
 
 
 def plugin_loaded():
-	LspAureliaPlugin.setup()
+	LspAureliaPlugin.register()
 
 
 def plugin_unloaded():
-	LspAureliaPlugin.cleanup()
+	LspAureliaPlugin.unregister()
 
 
-class LspAureliaPlugin(NpmClientHandler):
-	package_name = __package__
-	# server_directory = "server" # TODO: edit once working
-	# server_binary_path = os.path.join(server_directory) # TODO: edit once working
+class LspAureliaPlugin(LspPlugin):
 
-	# test - server from https://github.com/LetsZiggy/aurelia-language-server
-	# server_directory = "server-github"
-	# server_binary_path = os.path.join(server_directory, "node_modules", "aurelia", "server", "out", "server.js")
-
-	# test - .vsix
-	server_directory = "server-local"
-	server_binary_path = os.path.join(server_directory, "out", "server.js")
+	@classmethod
+	@override
+	def on_pre_start_async(cls, context: OnPreStartContext) -> None:
+		package_name = cls.plugin_storage_path.name
+		NodeManager.on_pre_start_async(
+			context,
+			cls.plugin_storage_path,
+			ResourcePath("Packages", package_name, "server-local"),
+			Path("out", "server.js"),
+			node_version_requirement=">=18",
+		)

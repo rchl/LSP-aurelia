@@ -12,6 +12,7 @@ dev = [
 ]
 
 [tool.basedpyright]
+typeCheckingMode = 'standard'
 venvPath = "."
 venv = ".venv"
 #pythonVersion = "" # optional
